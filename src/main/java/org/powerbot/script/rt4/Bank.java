@@ -37,24 +37,41 @@ public class Bank extends ItemQuery<Item> {
 
 	private Interactive getBank() {
 		final Player p = ctx.players.local();
-		final Tile t = p.tile();
+        final Tile t = p.tile();
 
-		ctx.npcs.select().name(Constants.BANK_NPCS).viewable().select(UNREACHABLE_FILTER).nearest();
-		ctx.objects.select().name(Constants.BANK_BOOTHS, Constants.BANK_CHESTS).viewable().select(UNREACHABLE_FILTER).nearest();
-		if (!ctx.properties.getProperty("bank.antipattern", "").equals("disable")) {
-			final Npc npc = ctx.npcs.poll();
-			final GameObject object = ctx.objects.poll();
-			return t.distanceTo(npc) < t.distanceTo(object) ? npc : object;
-		}
-		final double dist = Math.min(t.distanceTo(ctx.npcs.peek()), t.distanceTo(ctx.objects.peek()));
-		final double d2 = Math.min(2d, Math.max(0d, dist - 1d));
-		final List<Interactive> interactives = new ArrayList<Interactive>();
-		ctx.npcs.within(dist + Random.nextInt(2, 5)).within(ctx.npcs.peek(), d2);
-		ctx.objects.within(dist + Random.nextInt(2, 5)).within(ctx.objects.peek(), d2);
-		ctx.npcs.addTo(interactives);
-		ctx.objects.addTo(interactives);
-		final int len = interactives.size();
-		return len == 0 ? ctx.npcs.nil() : interactives.get(Random.nextInt(0, len));
+        ctx.npcs.select().name(Constants.BANK_NPCS).viewable().select(UNREACHABLE_FILTER).nearest();
+        ctx.objects.select().name(Constants.BANK_BOOTHS, Constants.BANK_CHESTS).viewable().select(UNREACHABLE_FILTER)
+                .select(gameObject -> {
+                for (String action : gameObject.actions()) {
+                    if (action == null) {
+                        continue;
+                    }
+
+                    if (action.equalsIgnoreCase("Bank")
+                            || action.equalsIgnoreCase("Use")
+                            || action.equalsIgnoreCase("Open")
+                    ) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }).nearest();
+        if (!ctx.properties.getProperty("bank.antipattern", "").equals("disable")) {
+            final Npc npc = ctx.npcs.poll();
+            final GameObject object = ctx.objects.poll();
+            return t.distanceTo(npc) < t.distanceTo(object) ? npc : object;
+        }
+        final double dist = Math.min(t.distanceTo(ctx.npcs.peek()), t.distanceTo(ctx.objects.peek()));
+        final double d2 = Math.min(2d, Math.max(0d, dist - 1d));
+        final List<Interactive> interactives = new ArrayList<Interactive>();
+        ctx.npcs.within(dist + Random.nextInt(2, 5)).within(ctx.npcs.peek(), d2);
+        ctx.objects.within(dist + Random.nextInt(2, 5)).within(ctx.objects.peek(), d2);
+        ctx.npcs.addTo(interactives);
+        ctx.objects.addTo(interactives);
+        final int len = interactives.size();
+
+        return len == 0 ? ctx.npcs.nil() : interactives.get(Random.nextInt(0, len));
 	}
 
 	/**
