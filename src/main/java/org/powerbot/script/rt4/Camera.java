@@ -61,6 +61,28 @@ public class Camera extends ClientAccessor {
 	}
 
 	/**
+     * Returns the current zoom level of the camera, as a percentage of being all the way zoomed in.
+     * Being all the way zoomed in results in 100, zoomed out results in 0.
+     *
+     * @return The zoom level of the camera.
+     */
+    public int zoom() {
+        int SETTINGS = 261;
+        int BAR      = 14;
+        int KNOB     = 15;
+
+        Widget settings = ctx.widgets.widget(SETTINGS);
+
+        Component bar = settings.component(BAR);
+        Component knob = settings.component(KNOB);
+
+        double derivativeOne = (knob.screenPoint().x - bar.screenPoint().x);
+        double derivativeTwo = (bar.width() - knob.width());
+
+        return (int) Math.round(derivativeOne / derivativeTwo * 100);
+    }
+
+	/**
 	 * Determines the current camera pitch.
 	 *
 	 * @return the camera pitch
