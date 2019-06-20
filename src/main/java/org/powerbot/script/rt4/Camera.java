@@ -60,7 +60,7 @@ public class Camera extends ClientAccessor {
 		return (int) (client.getCameraYaw() / 5.68);
 	}
 
-	/**
+    /**
      * Returns the current zoom level of the camera, as a percentage of being all the way zoomed in.
      * Being all the way zoomed in results in 100, zoomed out results in 0.
      *
